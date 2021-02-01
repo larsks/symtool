@@ -22,6 +22,7 @@ class SYM1 (serial.Serial):
 
     def __init__(self, *args, debug=None, **kwargs):
         super().__init__(*args, **kwargs)
+        LOG.info('using port %s', self.port)
 
         self._debug = debug
 
@@ -97,7 +98,7 @@ class SYM1 (serial.Serial):
             self.write(b'>')
 
         self.return_to_prompt()
-        return data
+        return bytes(data)
 
     def load(self, addr, data):
         self.write(f'd{addr:x}\r'.encode())
@@ -107,6 +108,7 @@ class SYM1 (serial.Serial):
         self.return_to_prompt()
 
 
-logging.basicConfig(level='DEBUG')
-s = SYM1('/dev/ttyUSB2', 2400, timeout=1, debug=True)
-s.connect()
+if __name__ == '__main__':
+    logging.basicConfig(level='DEBUG')
+    s = SYM1('/dev/ttyUSB2', 2400, timeout=1, debug=True)
+    s.connect()
