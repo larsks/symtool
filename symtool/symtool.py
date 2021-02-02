@@ -109,6 +109,10 @@ class SYM1 (serial.Serial):
 
         self.return_to_prompt()
 
+    def go(self, addr):
+        LOG.info('jump to subroutine at %X', addr)
+        self.write(f'g{addr:x}\r'.encode())
+
 
 if __name__ == '__main__':
     logging.basicConfig(level='DEBUG')

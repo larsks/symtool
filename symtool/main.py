@@ -104,5 +104,14 @@ def registers(ctx):
         print()
 
 
+@main.command()
+@click.argument('address', type=prefixed_int)
+@click.pass_context
+def go(ctx, address):
+    sym = ctx.obj
+    sym.connect()
+    sym.go(address)
+
+
 if __name__ == '__main__':
     main()
