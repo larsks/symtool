@@ -76,12 +76,32 @@ def load(ctx, seek, address, count, input):
 @main.command()
 @click.pass_context
 def registers(ctx):
+    flags = [
+        'carry',
+        'zero',
+        'intr',
+        'dec',
+        None,
+        None,
+        'oflow',
+        'neg',
+    ]
+
     sym = ctx.obj
     sym.connect()
     data = sym.registers()
 
     for reg, val in data.items():
-        print(reg, f'{val:x}')
+        print(reg, f'{val:02x} ({val:08b})', end='')
+        if reg == 'f':
+            for i in range(8):
+                if not flags[i]:
+                    continue
+
+                print(' {}{}'.format(
+                    '+' if val & (1 << i) else '-', flags[i]
+                ), end='')
+        print()
 
 
 if __name__ == '__main__':
