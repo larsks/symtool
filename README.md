@@ -31,6 +31,9 @@ using Python's numeric prefixes:
 - Octal: `0o20000`
 - Binary: `0b10000000000000`
 
+And in order to meet common 6502 conventions, you can also use `$` as
+a prefix on hexadecimal numbers (`$2000`).
+
 ## Dump memory
 
 ```

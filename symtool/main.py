@@ -28,6 +28,8 @@ def main(ctx, device, speed, verbose):
 def prefixed_int(v):
     if isinstance(v, int):
         return v
+    elif v.startswith('$'):
+        return int(v[1:], 16)
     else:
         return int(v, 0)
 
