@@ -18,6 +18,7 @@ Options:
 
 Commands:
   dump
+  fill
   go
   load
   registers
@@ -56,6 +57,23 @@ Options:
   -a, --address PREFIXED_INT
   -c, --count PREFIXED_INT
   --help                      Show this message and exit.
+```
+
+## Fill memory
+
+```
+Usage: symtool fill [OPTIONS] ADDRESS FILLBYTE [COUNT]
+
+Options:
+  --help  Show this message and exit.
+```
+
+To fill memory at `$400` with 16 zeros:
+
+```
+$ symtool fill 0x400 0 16
+$ symtool dump 0x400 16 -h
+00000000: 00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  ................
 ```
 
 ## Show registers

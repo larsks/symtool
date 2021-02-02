@@ -76,6 +76,17 @@ def load(ctx, seek, address, count, input):
 
 
 @main.command()
+@click.argument('address', type=prefixed_int)
+@click.argument('fillbyte', type=prefixed_int)
+@click.argument('count', type=prefixed_int, default=1)
+@click.pass_context
+def fill(ctx, address, fillbyte, count):
+    sym = ctx.obj
+    sym.connect()
+    sym.fill(address, fillbyte, count)
+
+
+@main.command()
 @click.pass_context
 def registers(ctx):
     flags = [

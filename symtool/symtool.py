@@ -113,6 +113,13 @@ class SYM1 (serial.Serial):
         LOG.info('jump to subroutine at %X', addr)
         self.write(f'g{addr:x}\r'.encode())
 
+    def fill(self, addr, fillbyte, count=1):
+        LOG.info('fill %d bytes of memory at $%X with %r',
+                 count, addr, fillbyte)
+        end = addr + (count-1)
+        self.write(f'f{fillbyte:x},{addr:x},{end:x}\r'.encode())
+        self.return_to_prompt()
+
 
 if __name__ == '__main__':
     logging.basicConfig(level='DEBUG')
