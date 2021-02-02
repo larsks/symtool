@@ -46,17 +46,42 @@ Options:
   --help                         Show this message and exit.
 ```
 
+You can dump binary output:
+
+```
+$ symtool dump 0x400 16 -o somefile.bin
+```
+
+You can generate a hexdump:
+
+```
+$ symtool dump 0x400 16 -h
+00000000: A2 FF A0 FF CA D0 FD 88  D0 FA 20 72 89 4C 00 04  .......... r.L..
+```
+
+You can disassemble the memory:
+
+```
+$ symtool dump 0x400 16 -d
+$0400   a2 ff       LDX #$FF
+$0402   a0 ff       LDY #$FF
+$0404   ca          DEX
+$0405   d0 fd       BNE $FD
+$0407   88          DEY
+$0408   d0 fa       BNE $FA
+$040a   20 72 89    JSR $8972
+$040d   4c 00 04    JMP $0400
+```
 
 ## Load memory
 
 ```
-Usage: symtool load [OPTIONS] [INPUT]
+Usage: symtool load [OPTIONS] ADDRESS [INPUT]
 
 Options:
   -s, --seek PREFIXED_INT
-  -a, --address PREFIXED_INT
   -c, --count PREFIXED_INT
-  --help                      Show this message and exit.
+  --help                    Show this message and exit.
 ```
 
 ## Fill memory
@@ -92,4 +117,17 @@ Usage: symtool go [OPTIONS] ADDRESS
 
 Options:
   --help  Show this message and exit.
+```
+
+Example usage:
+
+
+```
+$ symtool registers
+s ff (11111111)
+f 00 (00000000) -carry -zero -intr -dec -oflow -neg
+a 00 (00000000)
+x 00 (00000000)
+y 00 (00000000)
+p 8b4a (1000101101001010)
 ```
