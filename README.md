@@ -84,6 +84,16 @@ Options:
   --help                    Show this message and exit.
 ```
 
+To load `asm/beeper.bin` into memory at location `$400`:
+
+```
+$ symtool -v load 0x400 asm/beeper.bin
+INFO:symtool.symtool:using port /dev/ttyUSB2
+INFO:symtool.symtool:connecting to sym1...
+INFO:symtool.symtool:connected
+INFO:symtool.symtool:loading 16 bytes of data at $400
+```
+
 ## Fill memory
 
 ```
@@ -110,6 +120,19 @@ Options:
   --help  Show this message and exit.
 ```
 
+Example usage:
+
+
+```
+$ symtool registers
+s ff (11111111)
+f b1 (10110001) +carry -zero -intr -dec -oflow +neg
+a 80 (10000000)
+x 00 (00000000)
+y 50 (01010000)
+p b0ac (1011000010101100)
+```
+
 ## Jump to address
 
 ```
@@ -119,15 +142,8 @@ Options:
   --help  Show this message and exit.
 ```
 
-Example usage:
-
+To run a program at location `$400`:
 
 ```
-$ symtool registers
-s ff (11111111)
-f 00 (00000000) -carry -zero -intr -dec -oflow -neg
-a 00 (00000000)
-x 00 (00000000)
-y 00 (00000000)
-p 8b4a (1000101101001010)
+$ symtool go 0x400
 ```
