@@ -78,7 +78,7 @@ class SYM1 (serial.Serial):
             _regname, val = data.split()
             if _regname.decode().lower() != regname:
                 raise KeyError(f'unexpected register name ({_regname} != {regname}')
-            reg[regname] = val
+            reg[regname] = int(val, 16)
 
         self.return_to_prompt()
         return reg
