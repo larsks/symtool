@@ -60,8 +60,8 @@ def dump(ctx, ascii_mode, output, address, count):
 
 @main.command()
 @click.option('--seek', '-s', type=prefixed_int)
-@click.option('--address', '-a', type=prefixed_int, default=0)
 @click.option('--count', '-c', type=prefixed_int)
+@click.argument('address', type=prefixed_int)
 @click.argument('input', type=click.File(mode='rb'), default=sys.stdin.buffer)
 @click.pass_context
 def load(ctx, seek, address, count, input):
