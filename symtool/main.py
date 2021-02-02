@@ -26,22 +26,25 @@ def main(ctx, device, speed, verbose):
 
 
 def prefixed_int(v):
-    return int(v, 0)
+    if isinstance(v, int):
+        return v
+    else:
+        return int(v, 0)
 
 
 @main.command()
 @click.option('--hex/--disassemble', '-h/-d', 'ascii_mode', default=None)
 @click.option('--output', '-o', type=click.File(mode='wb'), default=sys.stdout.buffer)
 @click.argument('address', type=prefixed_int)
-@click.argument('count', type=prefixed_int)
+@click.argument('count', type=prefixed_int, default=1)
 @click.pass_context
 def dump(ctx, ascii_mode, output, address, count):
+    if count < 1:
+        raise ValueError('count must be >= 1')
+
     sym = ctx.obj
     sym.connect()
     data = sym.dump(address, count)
-
-    if count < 1:
-        raise ValueError('count must be >= 1')
 
     with output:
         if ascii_mode is True:
@@ -51,6 +54,23 @@ def dump(ctx, ascii_mode, output, address, count):
             output.write(symtool.disasm.format(symtool.disasm.disasm(data, base=address)).encode())
         else:
             output.write(data)
+
+
+@main.command()
+@click.option('--seek', '-s', type=prefixed_int)
+@click.option('--address', '-a', type=prefixed_int, default=0)
+@click.option('--count', '-c', type=prefixed_int)
+@click.argument('input', type=click.File(mode='rb'), default=sys.stdin.buffer)
+@click.pass_context
+def load(ctx, seek, address, count, input):
+    sym = ctx.obj
+    sym.connect()
+
+    with input:
+        if seek:
+            input.seek(seek)
+        data = input.read(count)
+        sym.load(address, data)
 
 
 @main.command()
@@ -66,4 +86,3 @@ def registers(ctx):
 
 if __name__ == '__main__':
     main()
-

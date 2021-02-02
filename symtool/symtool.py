@@ -88,6 +88,7 @@ class SYM1 (serial.Serial):
         self.read_until(b'.')
 
     def dump(self, addr, count=1):
+        LOG.info('reading %d bytes of data from %X', count, addr)
         self.write(f'm{addr:x}\r'.encode())
         data = []
         for i in range(count):
@@ -101,6 +102,7 @@ class SYM1 (serial.Serial):
         return bytes(data)
 
     def load(self, addr, data):
+        LOG.info('loading %d bytes of data at %X', len(data), addr)
         self.write(f'd{addr:x}\r'.encode())
         for val in data:
             self.write(f'{val:02x}'.encode())
