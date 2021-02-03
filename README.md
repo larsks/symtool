@@ -44,7 +44,9 @@ environment.
 
 The SYM_1 supports baud rates from 110bps to 4800bps.
 
-## Dump memory
+## Commands
+
+### Dump memory
 
 ```
 Usage: symtool dump [OPTIONS] ADDRESS [COUNT]
@@ -82,7 +84,7 @@ $040a   20 72 89    JSR $8972
 $040d   4c 00 04    JMP $0400
 ```
 
-## Load memory
+### Load memory
 
 ```
 Usage: symtool load [OPTIONS] ADDRESS [INPUT]
@@ -103,7 +105,7 @@ INFO:symtool.symtool:connected
 INFO:symtool.symtool:loading 16 bytes of data at $400
 ```
 
-## Fill memory
+### Fill memory
 
 ```
 Usage: symtool fill [OPTIONS] ADDRESS FILLBYTE [COUNT]
@@ -120,7 +122,7 @@ $ symtool dump 0x400 16 -h
 00000000: 00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  ................
 ```
 
-## Show registers
+### Show registers
 
 ```
 Usage: symtool registers [OPTIONS]
@@ -142,7 +144,7 @@ y 50 (01010000)
 p b0ac (1011000010101100)
 ```
 
-## Jump to address
+### Jump to address
 
 ```
 Usage: symtool go [OPTIONS] ADDRESS
@@ -156,3 +158,12 @@ To run a program at location `$400`:
 ```
 $ symtool go 0x400
 ```
+
+## Compiling assembly programs
+
+The assembly programs in the `asm` directory are written to be
+compatible with the [ca65 assembler][]. The `Makefile` in that
+directory will compile the source to `.bin` files that can be loaded
+to your SYM-1 using the `symtool load` command.
+
+[ca65]: https://cc65.github.io/doc/ca65.html
