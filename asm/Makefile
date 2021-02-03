@@ -3,7 +3,8 @@ LD65 = ld65
 
 PRGS = \
        beeper.bin \
-       message.bin
+       message.bin \
+       countdown.bin
 
 GENERATED = \
 	$(PRGS)
