@@ -56,7 +56,8 @@ class SYM1 (serial.Serial):
             if ch != b'':
                 break
 
-            LOG.warning('failed to connect; retrying...')
+            LOG.warning('failed to connect on %s; retrying...',
+                        self.port)
             time.sleep(1)
 
         LOG.info('connected')
