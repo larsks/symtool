@@ -18,7 +18,7 @@ def onlybytes(func):
 
 
 class SYM1 (serial.Serial):
-    character_interval = 0.1
+    character_interval = 0.05
 
     def __init__(self, *args, debug=None, **kwargs):
         super().__init__(*args, **kwargs)
