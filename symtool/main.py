@@ -9,7 +9,7 @@ import symtool.symtool
 
 @click.group(context_settings=dict(auto_envvar_prefix='SYMTOOL'))
 @click.option('--device', '-d', default='/dev/ttyS0')
-@click.option('--speed', '-s', default=2400, type=int)
+@click.option('--speed', '-s', default=4800, type=int)
 @click.option('--verbose', '-v', count=True)
 @click.pass_context
 def main(ctx, device, speed, verbose):
