@@ -84,4 +84,7 @@ three:          lda             DISBUF+1,y      ; registers by looping and
                 pla                             ; place the first register in
                 sta             DISBUF+6        ; the last memory location
 
-                jmp             cycle
+                clc
+                jsr             KYSTAT          ; check if key is pressed
+                bcc             cycle           ; cycle if no key
+                rts                             ; otherwise exit
