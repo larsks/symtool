@@ -46,4 +46,4 @@ DISBUF          =       $A640
 TECHO           =       $A653           ; terminal echo
 SDBYT           =       $A651           ; baud rate
 
-SCANDS          =       $8906           ; ??? from rotating display example
+SCANDS          =       $8906           ; scan display from DISBUF
