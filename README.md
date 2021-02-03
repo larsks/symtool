@@ -35,6 +35,15 @@ using Python's numeric prefixes:
 And in order to meet common 6502 conventions, you can also use `$` as
 a prefix on hexadecimal numbers (`$2000`).
 
+## Configuration
+
+You can set the device and speed on the command line using the
+`--device` and `--speed` options (aka `-d` and `-s`), or you can set
+the `SYMTOOL_DEVICE` and `SYMTOOL_SPEED` variables in your
+environment.
+
+The SYM_1 supports baud rates from 110bps to 4800bps.
+
 ## Dump memory
 
 ```
