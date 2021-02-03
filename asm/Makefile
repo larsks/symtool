@@ -2,7 +2,8 @@ CA65 = ca65
 LD65 = ld65
 
 PRGS = \
-       beeper.bin
+       beeper.bin \
+       message.bin
 
 GENERATED = \
 	$(PRGS)
