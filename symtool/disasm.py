@@ -1,5 +1,3 @@
-from io import StringIO
-
 mnemonics = [
   'BRK', 'ORA', '???', '???', '???', 'ORA', 'ASL', '???', 'PHP', 'ORA', 'ASL', '???', '???', 'ORA', 'ASL', '???',
   'BPL', 'ORA', '???', '???', '???', 'ORA', 'ASL', '???', 'CLC', 'ORA', '???', '???', '???', 'ORA', 'ASL', '???',
@@ -37,117 +35,81 @@ addressing = [
   'rel', 'iny', 'imp', 'imp', 'imp', 'zpx', 'zpx', 'imp', 'imp', 'aby', 'imp', 'imp', 'imp', 'abx', 'abx', 'imp']
 
 
-class once:
-    def __init__(self):
-        self.ran = False
-
-    def __iter__(self):
-        return self
-
-    def __next__(self):
-        if self.ran:
-            raise StopIteration()
-
-        self.ran = True
-
-
 def disasm(data, base=0):
-    def _disasm_one_line():
-        nonlocal pos
+    def _disasm_one_line(data):
+        addr, opcode = next(data)
 
         line = {
-            'addr': base+pos,
+            'addr': addr,
             'hex': [],
-            'asm': ''
+            'asm': None,
         }
 
-        for i in once():
-            opcode = data[pos]
-            mnemonic = mnemonics[opcode]
-            addrmode = addressing[opcode]
-            pos += 1
+        mnemonic = mnemonics[opcode]
+        addrmode = addressing[opcode]
+        line['hex'].append(opcode)
 
-            line['hex'].append(opcode)
+        if addrmode in ['imp', 'acc']:
+            line['asm'] = mnemonic
+            return line
 
-            if addrmode in ['imp', 'acc']:
-                line['asm'] = mnemonic
-                break
+        operand = next(data)[1]
+        line['hex'].append(operand)
 
-            operand = data[pos]
-            line['hex'].append(operand)
-            pos += 1
+        if addrmode == 'imm':
+            line['asm'] = f'{mnemonic} #${operand:02X}'
+            return line
+        elif addrmode in ['rel', 'zpg']:
+            line['asm'] = f'{mnemonic} ${operand:02X}'
+            return line
+        elif addrmode == 'zpx':
+            line['asm'] = f'{mnemonic} ${operand:02X},X'
+            return line
+        elif addrmode == 'zpy':
+            line['asm'] = f'{mnemonic} ${operand:02X},Y'
+            return line
+        elif addrmode == 'inx':
+            line['asm'] = f'{mnemonic} (${operand:02X},X)'
+            return line
+        elif addrmode == 'zpy':
+            line['asm'] = f'{mnemonic} (${operand:02X}),Y'
+            return line
 
-            if addrmode == 'imm':
-                line['asm'] = f'{mnemonic} #${operand:02X}'
-                break
-            elif addrmode in ['rel', 'zpg']:
-                line['asm'] = f'{mnemonic} ${operand:02X}'
-                break
-            elif addrmode == 'zpx':
-                line['asm'] = f'{mnemonic} ${operand:02X},X'
-                break
-            elif addrmode == 'zpy':
-                line['asm'] = f'{mnemonic} ${operand:02X},Y'
-                break
-            elif addrmode == 'inx':
-                line['asm'] = f'{mnemonic} (${operand:02X},X)'
-                break
-            elif addrmode == 'zpy':
-                line['asm'] = f'{mnemonic} (${operand:02X}),Y'
-                break
+        op2 = next(data)[1]
 
-            op2 = data[pos]
+        line['hex'].append(op2)
+        operand = (op2 << 8) + operand
 
-            line['hex'].append(op2)
-            operand = (op2 << 8) + operand
-            pos += 1
+        if addrmode == 'ind':
+            line['asm'] = f'{mnemonic} (${operand:04X})'
+            return line
+        elif addrmode == 'abs':
+            line['asm'] = f'{mnemonic} ${operand:04X}'
+            return line
+        elif addrmode == 'abx':
+            line['asm'] = f'{mnemonic} ${operand:04X},X'
+            return line
+        elif addrmode == 'aby':
+            line['asm'] = f'{mnemonic} ${operand:04X},Y'
+            return line
 
-            if addrmode == 'ind':
-                line['asm'] = f'{mnemonic} (${operand:04X})'
-                break
-            elif addrmode == 'abs':
-                line['asm'] = f'{mnemonic} ${operand:04X}'
-                break
-            elif addrmode == 'abx':
-                line['asm'] = f'{mnemonic} ${operand:04X},X'
-                break
-            elif addrmode == 'aby':
-                line['asm'] = f'{mnemonic} ${operand:04X},Y'
-                break
-
-        return line
-
-    pos = 0
+    data = enumerate(data, base)
     lines = []
 
-    while pos < len(data):
+    while True:
         try:
-            line = _disasm_one_line()
-        except IndexError:
+            lines.append(_disasm_one_line(data))
+        except StopIteration:
             break
-        else:
-            lines.append(line)
 
     return lines
 
 
 def format(lines):
-    buf = StringIO()
+    buf = []
 
     for line in lines:
         hex = ' '.join(f'{x:02x}' for x in line['hex'])
-        buf.write(f'${line["addr"]:04x}   {hex:12}{line["asm"]}\n')
+        buf.append(f'${line["addr"]:04x}   {hex:12}{line["asm"]}\n')
 
-    return buf.getvalue()
-
-
-sample_hex = 'a9 01 8d 00 02 a9 05 8d 01 02 a9 08 8d 02 02'
-sample_bin = bytes([int(x, 16) for x in sample_hex.split()])
-sample_code = '''
-LDA #$01
-STA $0200
-LDA #$05
-STA $0201
-LDA #$08
-STA $0202
-'''
+    return ''.join(buf)
