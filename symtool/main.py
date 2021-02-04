@@ -61,10 +61,11 @@ def dump(ctx, ascii_mode, output, address, count):
 @main.command()
 @click.option('--seek', '-s', type=prefixed_int)
 @click.option('--count', '-c', type=prefixed_int)
+@click.option('--go', '-g', is_flag=True)
 @click.argument('address', type=prefixed_int)
 @click.argument('input', type=click.File(mode='rb'), default=sys.stdin.buffer)
 @click.pass_context
-def load(ctx, seek, address, count, input):
+def load(ctx, seek, address, count, go, input):
     sym = ctx.obj
     sym.connect()
 
@@ -73,6 +74,9 @@ def load(ctx, seek, address, count, input):
             input.seek(seek)
         data = input.read(count)
         sym.load(address, data)
+
+        if go:
+            sym.go(address)
 
 
 @main.command()

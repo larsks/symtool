@@ -92,6 +92,7 @@ Usage: symtool load [OPTIONS] ADDRESS [INPUT]
 Options:
   -s, --seek PREFIXED_INT
   -c, --count PREFIXED_INT
+  -g, --go
   --help                    Show this message and exit.
 ```
 
@@ -104,6 +105,8 @@ INFO:symtool.symtool:connecting to sym1...
 INFO:symtool.symtool:connected
 INFO:symtool.symtool:loading 16 bytes of data at $400
 ```
+
+Specify `--go` to execute `g<address>` after loading the program.
 
 ### Fill memory
 
