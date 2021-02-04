@@ -23,7 +23,7 @@ DEPS = $(SOURCES:.s=.d)
 GENERATED = \
 	$(PRGS)
 
-%.o: %.s
+%.o %.lst: %.s
 	$(CA65) $(CA65FLAGS) -g -t none -o $@ -l $(@:.o=.lst) $<
 
 %.x: %.s genexports.awk
