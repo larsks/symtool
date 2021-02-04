@@ -60,20 +60,20 @@ Options:
 You can dump binary output:
 
 ```
-$ symtool dump 0x400 16 -o somefile.bin
+$ symtool dump 0x200 16 -o somefile.bin
 ```
 
 You can generate a hexdump:
 
 ```
-$ symtool dump 0x400 16 -h
+$ symtool dump 0x200 16 -h
 00000000: A2 FF A0 FF CA D0 FD 88  D0 FA 20 72 89 4C 00 04  .......... r.L..
 ```
 
 You can disassemble the memory:
 
 ```
-$ symtool dump 0x400 16 -d
+$ symtool dump 0x200 16 -d
 $0400   a2 ff       LDX #$FF
 $0402   a0 ff       LDY #$FF
 $0404   ca          DEX
@@ -98,7 +98,7 @@ Options:
 To load `asm/beeper.bin` into memory at location `$400`:
 
 ```
-$ symtool -v load 0x400 asm/beeper.bin
+$ symtool -v load 0x200 asm/beeper.bin
 INFO:symtool.symtool:using port /dev/ttyUSB2
 INFO:symtool.symtool:connecting to sym1...
 INFO:symtool.symtool:connected
@@ -117,8 +117,8 @@ Options:
 To fill memory at `$400` with 16 zeros:
 
 ```
-$ symtool fill 0x400 0 16
-$ symtool dump 0x400 16 -h
+$ symtool fill 0x200 0 16
+$ symtool dump 0x200 16 -h
 00000000: 00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  ................
 ```
 
@@ -156,7 +156,7 @@ Options:
 To run a program at location `$400`:
 
 ```
-$ symtool go 0x400
+$ symtool go 0x200
 ```
 
 ## Compiling assembly programs
