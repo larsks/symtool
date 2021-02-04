@@ -2,3 +2,6 @@
 *.lst
 *.lbl
 *.o
+*.d
+*.x
+Pipfile.lock
