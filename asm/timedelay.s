@@ -1,4 +1,4 @@
-                .include        "monitor.s"
+                .import         ACCESS,SCAND
                 .include        "segments.s"
 
 IFR             =               $A405           ; read interrupt flag

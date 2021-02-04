@@ -2,7 +2,8 @@
 ; Notes" document (with a modified message).
 ; (http://www.6502.org/trainers/synertek/manuals/technotes.pdf)
 
-                .include        "monitor.s"
+                .import         ACCESS,IRQVEC,SCAND,BEEP,SEGTBL
+                .import         D1,D2,D3,D4,D5,D6
 
                                                 ; registers on 6522 #3 (U29)
 ACR1            =               $AC0B           ; auxiliary control register

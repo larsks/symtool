@@ -2,7 +2,7 @@
 ; Notes" document (with a modified message).
 ; (http://www.6502.org/trainers/synertek/manuals/technotes.pdf)
 
-                .include        "monitor.s"
+                .import         ACCESS,DISBUF,SCAND,KYSTAT
                 .include        "segments.s"
 
                 .segment        "RODATA"

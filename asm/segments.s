@@ -1,5 +1,7 @@
                 ; symbol table for the led display
 
+                .import         D1,D2,D3,D4,D5,D6
+
 O0              =               $3F
 O1              =               $06
 O2              =               $5B

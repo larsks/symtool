@@ -1,6 +1,6 @@
 ; beep periodically until a key is pressed
 ;
-        .include        "monitor.s"
+        .import         BEEP,KYSTAT
 
 main:   ldx             #$ff
         ldy             #$ff
