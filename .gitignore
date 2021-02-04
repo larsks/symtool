@@ -1,7 +1,20 @@
-*.bin
-*.lst
-*.lbl
 *.o
-*.d
-*.x
 Pipfile.lock
+
+# compiled binaries
+*.bin
+
+# assembly listings
+*.lst
+
+# vice label files
+*.lbl
+
+# dependencies
+*.d
+
+# ca65 exports
+*.x
+
+# radare scripts
+*.r
