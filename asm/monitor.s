@@ -34,6 +34,7 @@ SCAND           =       $8906           ; scan display from DISBUF
 KEYQ            =       $8923
 KYSTAT          =       $896A
 BEEP            =       $8972           ; make a sound on onboard beeper
+CONFIG          =       $89A5           ; configure i/o
 HKEY            =       $89BE           ; get key from hex keyboard and echo in DISBUF
 OUTDSP          =       $89C1           ; convert ascii to segment code, put in DISBUF
 TEXT            =       $8A06

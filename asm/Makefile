@@ -7,7 +7,8 @@ PRGS = \
        simple_beep.bin \
        message.bin \
        countdown.bin \
-       timedelay.bin
+       timedelay.bin \
+       beeper.bin
 
 SOURCES = \
 	simple_beep.s \
@@ -16,7 +17,8 @@ SOURCES = \
 	message.s \
 	monitor.s \
 	segments.s \
-	timedelay.s
+	timedelay.s \
+	beeper.s
 
 DEPS = $(SOURCES:.s=.d)
 
