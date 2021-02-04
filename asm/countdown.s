@@ -89,16 +89,16 @@ count:          clc                             ; increment counter
                 beq             beep
                 rts
 
-beep:           lda             #$7c    ; B
+beep:           lda             #$7c            ; B
                 sta             D5
-                lda             #$79    ; E
+                lda             #$79            ; E
                 sta             D4
                 sta             D3
-                lda             #$73    ; P
+                lda             #$73            ; P
                 sta             D2
                 lda             #$00
                 sta             num
-delay:          jsr             BEEP    ; display BEEP and play a sound
+delay:          jsr             BEEP            ; display BEEP and play a sound
                 jsr             SCAND
                 jsr             SCAND
                 jsr             SCAND
@@ -119,7 +119,7 @@ delay:          jsr             BEEP    ; display BEEP and play a sound
                 sta             flag1
                 rts
 
-restore:        pla             ; restore all registers
+restore:        pla                             ; restore all registers
                 tay
                 pla
                 tax
