@@ -1,3 +1,8 @@
+; monitor.s
+; monitor routines and constants from the sym-1 reference manual
+;
+; part of symtool (https://github.com/larsks/symtool)
+
 ; ======================================================================
 ; MONITOR ROUTINES
 ;

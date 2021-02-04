@@ -1,6 +1,10 @@
+; countdown.s
+;
 ; This is "Program #3 - Count and Beep" from page 14 of the SYM-1 "Technical
 ; Notes" document (with a modified message).
 ; (http://www.6502.org/trainers/synertek/manuals/technotes.pdf)
+;
+; part of symtool (https://github.com/larsks/symtool)
 
                 .import         ACCESS,IRQVEC,SCAND,BEEP,SEGTBL
                 .import         D1,D2,D3,D4,D5,D6

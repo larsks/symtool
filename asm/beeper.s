@@ -1,5 +1,8 @@
+; beeper.s
 ; beep periodically until a key is pressed
 ;
+; part of symtool (https://github.com/larsks/symtool)
+
         .import         BEEP,KYSTAT
 
 main:   ldx             #$ff

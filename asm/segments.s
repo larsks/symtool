@@ -1,4 +1,7 @@
-                ; symbol table for the led display
+; segments.s
+; segment codes for 7-segment led display on sym-1
+;
+; part of symtool (https://github.com/larsks/symtool)
 
                 .import         D1,D2,D3,D4,D5,D6
 

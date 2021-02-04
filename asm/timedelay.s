@@ -1,3 +1,8 @@
+; timedelay.s
+; implement a time delay using 6532 timer
+;
+; part of symtool (https://github.com/larsks/symtool)
+
                 .import         ACCESS,SCAND,KYSTAT
                 .include        "segments.s"
 

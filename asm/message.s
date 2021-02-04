@@ -1,6 +1,10 @@
+; message.s
+;
 ; This is "Program #2 - Rotating Display" from page 12 of the SYM-1 "Technical
 ; Notes" document (with a modified message).
 ; (http://www.6502.org/trainers/synertek/manuals/technotes.pdf)
+;
+; part of symtool (https://github.com/larsks/symtool)
 
                 .import         ACCESS,DISBUF,SCAND,KYSTAT
                 .include        "segments.s"
