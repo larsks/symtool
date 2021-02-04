@@ -1,4 +1,4 @@
-; beeper.s
+; simple_beep.s
 ; beep periodically until a key is pressed
 ;
 ; part of symtool (https://github.com/larsks/symtool)

@@ -4,13 +4,13 @@ AWK = awk
 ENSCRIPT = enscript
 
 PRGS = \
-       beeper.bin \
+       simple_beep.bin \
        message.bin \
        countdown.bin \
        timedelay.bin
 
 SOURCES = \
-	beeper.s \
+	simple_beep.s \
 	countdown.s \
 	libsym.s \
 	message.s \
