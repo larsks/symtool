@@ -1,4 +1,4 @@
-                .import         ACCESS,SCAND
+                .import         ACCESS,SCAND,KYSTAT
                 .include        "segments.s"
 
 IFR             =               $A405           ; read interrupt flag
@@ -29,9 +29,9 @@ flag:           .byte           0
                 lda             #$00
                 sta             flag
 
-outside:        dec             flag
-                lda             #$ff            ; initialize timer count
+outside:        lda             #$ff            ; initialize timer count
                 sta             WTIMER1024      ; start timer
+                dec             flag
 inside:         lda             flag            ; check bit 0 of flag
                 and             #1
                 beq             noshow          ; only show message when == 1
@@ -39,7 +39,12 @@ inside:         lda             flag            ; check bit 0 of flag
 
 noshow:         bit             IFR             ; check for timer interrupt
                 bpl             inside          ; repeat inner loop if no interrupt
+
+                jsr             KYSTAT
+                bcs             exit
                 jmp             outside         ; repeat outside loop
+
+exit:           rts
 
 show:           lda             #OO     ; O
                 sta             D6
