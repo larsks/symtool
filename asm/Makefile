@@ -32,6 +32,9 @@ GENERATED = \
 %.d: %.s gendeps.awk
 	$(AWK) -f gendeps.awk $< > $@ || { rm -f $@; false; }
 
+%.r: %.lbl genflags.awk
+	$(AWK) -f genflags.awk $< > $@ || { rm -f $@; false; }
+
 %.pdf: %.lst
 	$(ENSCRIPT) -o $@ -r $<
 
@@ -44,7 +47,7 @@ GENERATED = \
 all: $(GENERATED)
 
 clean:
-	rm -f $(GENERATED) *.lst *.lbl *.o *.x *.d
+	rm -f $(GENERATED) *.lst *.lbl *.o *.x *.d *.r
 
 .PRECIOUS: libsym.o
 
