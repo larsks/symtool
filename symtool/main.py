@@ -147,7 +147,7 @@ def fill(sym, address, fillbyte, count):
     the value 255.
     '''
 
-    sym.fill(address, fillbyte, count)
+    sym.fill(address, fillbyte=fillbyte, count=count)
 
 
 @main.command()
