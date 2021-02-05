@@ -1,3 +1,4 @@
+import functools
 import logging
 import serial
 import time
@@ -35,10 +36,23 @@ class CommandError(SYMError):
         super().__init__(f'Received error {code} from monitor')
 
 
+class DisconnectedError(SYMError):
+    '''Attempt to communicate with SYM-1 before calling connect'''
+
+
 def stripped(i):
     return (x.strip() for x in i)
 
 
+def connected(func):
+    @functools.wraps(func)
+    def wrapper(self, *args, **kwargs):
+        if not self._connected:
+            raise DisconnectedError()
+
+        return func(self, *args, **kwargs)
+
+    return wrapper
 
 
 class DelayedSerial(serial.Serial):
@@ -178,6 +192,9 @@ class SYM1:
         except TimeoutError:
             pass
 
+        self._connected = True
+
+    @connected
     def registers(self):
         '''Read register contents.'''
 
@@ -198,6 +215,7 @@ class SYM1:
         self.return_to_prompt(True)
         return reg
 
+    @connected
     def dump(self, addr, count=1):
         '''Read bytes from memory.'''
 
@@ -214,6 +232,7 @@ class SYM1:
         self.return_to_prompt(True)
         return bytes(data)
 
+    @connected
     def load(self, addr, data):
         '''Write bytes to memory'''
 
@@ -225,12 +244,14 @@ class SYM1:
 
         self.return_to_prompt(True)
 
+    @connected
     def go(self, addr):
         '''Start executing at addr.'''
 
         LOG.info('jump to subroutine at %X', addr)
         self.send_command('g', f'{addr:x}'.encode())
 
+    @connected
     def fill(self, addr, fillbyte=0, count=1):
         '''Fill memory with the specified fillbyte (default 0).'''
 
