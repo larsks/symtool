@@ -37,7 +37,7 @@ GENERATED = \
 %.r: %.lbl genflags.awk
 	$(AWK) -f genflags.awk $< > $@ || { rm -f $@; false; }
 
-%.pdf: %.lst
+%.ps: %.lst
 	$(ENSCRIPT) -o $@ -r $<
 
 %.bin: %.o libsym.o
