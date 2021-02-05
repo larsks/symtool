@@ -168,8 +168,8 @@ class SYM1:
         try:
             self.return_to_prompt()
         except CommandError as err:
-            if err.code == 51:
-                pass
+            if err.code != 0x51:
+                raise
 
         # Flush input buffer. This takes care of any extra output caused
         # by the monitor being in an unknown state when we started.
