@@ -1,10 +1,22 @@
 import click
+import functools
 import hexdump
 import logging
 import sys
 
 import symtool.disasm
 import symtool.symtool
+
+
+def handle_exceptions(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except symtool.symtool.SYMError as err:
+            raise click.ClickException(str(err))
+
+    return wrapper
 
 
 @click.group(context_settings=dict(auto_envvar_prefix='SYMTOOL'))
@@ -61,6 +73,7 @@ def prefixed_int(v):
 @click.argument('address', type=prefixed_int)
 @click.argument('count', type=prefixed_int, default=1)
 @click.pass_context
+@handle_exceptions
 def dump(ctx, ascii_mode, output, address, count):
     '''Dump memory from the SYM-1 to stdout or a file.
 
@@ -98,6 +111,7 @@ def dump(ctx, ascii_mode, output, address, count):
 @click.argument('address', type=prefixed_int)
 @click.argument('input', type=click.File(mode='rb'), default=sys.stdin.buffer)
 @click.pass_context
+@handle_exceptions
 def load(ctx, seek, address, count, go, input):
     '''Load binary data from stdin or a file.
 
@@ -125,6 +139,7 @@ def load(ctx, seek, address, count, go, input):
 @click.argument('fillbyte', type=prefixed_int)
 @click.argument('count', type=prefixed_int, default=1)
 @click.pass_context
+@handle_exceptions
 def fill(ctx, address, fillbyte, count):
     '''Fill memory in the SYM-1 with the given byte value.
 
@@ -140,6 +155,7 @@ def fill(ctx, address, fillbyte, count):
 
 @main.command()
 @click.pass_context
+@handle_exceptions
 def registers(ctx):
     '''Dump 6502 registers'''
     flags = [
@@ -173,6 +189,7 @@ def registers(ctx):
 @main.command()
 @click.argument('address', type=prefixed_int)
 @click.pass_context
+@handle_exceptions
 def go(ctx, address):
     '''Start executing at the given address.
 

@@ -8,9 +8,15 @@ LOG = logging.getLogger(__name__)
 class SYMError(Exception):
     '''Parent class for exceptions raised by this module.'''
 
+    def __init__(self, *args):
+        if not args:
+            args = self.__doc__.splitlines()[0]
+
+        super().__init__(args)
+
 
 class TimeoutError(SYMError):
-    '''Indicates a timeout when waiting for serial data.
+    '''Timeout waiting for data
 
     Note that this may simply mean that we're out of sync with the
     monitor (e.g., code has called read_until('.') but the monitor
@@ -19,11 +25,14 @@ class TimeoutError(SYMError):
 
 
 class CommandError(SYMError):
-    '''Raised if we receive an error response from the SYM-1.'''
+    '''Received error response from monitor
+
+    This exception is raised when we receive an 'ER xx' response
+    from the monitor.'''
 
     def __init__(self, code):
         self.code = code
-        super().__init__(f'Error {code}')
+        super().__init__(f'Received error {code} from monitor')
 
 
 def stripped(i):
