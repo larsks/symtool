@@ -10,18 +10,26 @@ Symtool is a tool for interacting with the `SUPERMON` monitor on a
 ```
 Usage: symtool [OPTIONS] COMMAND [ARGS]...
 
+  Symtool is a tool for interacting with a SYM-1 computer.
+
+  The SYM-1 is a 6502 based single board computer produced by Synertek
+  Systems Corp in 1975. Symtool lets you dump memory, load programs into
+  memory, display register contents, and start executing code.
+
+  The SYM-1 supports  baud rates from 110bps to 4800bps.
+
 Options:
-  -d, --device TEXT
-  -s, --speed INTEGER
-  -v, --verbose
+  -d, --device TEXT    set serial port (default=/dev/ttyS0)
+  -s, --speed INTEGER  set port speed (default 4800)
+  -v, --verbose        enable additional logging (-vv for debug)
   --help               Show this message and exit.
 
 Commands:
-  dump
-  fill
-  go
-  load
-  registers
+  dump       Dump memory from the SYM-1 to stdout or a file.
+  fill       Fill memory in the SYM-1 with the given byte value.
+  go         Start executing at the given address.
+  load       Load binary data from stdin or a file.
+  registers  Dump 6502 registers
 ```
 
 Numbers (such as memory addresses, counts, etc) can be specified
@@ -51,9 +59,19 @@ The SYM_1 supports baud rates from 110bps to 4800bps.
 ```
 Usage: symtool dump [OPTIONS] ADDRESS [COUNT]
 
+  Dump memory from the SYM-1 to stdout or a file.
+
+  By default, the dump command will dump binary data to stdout. You can dump
+  to a file instead with the '-o <filename>' option.
+
+  You can request a hex dump with the --hex option, and a disassembly by
+  passing --disasseble.
+
 Options:
-  -h, --hex / -d, --disassemble
-  -o, --output FILENAME
+  -h, --hex / -d, --disassemble  output a hexdump (--hex) or disasssembly
+                                 (--disassemble)
+
+  -o, --output FILENAME          output to file instead of stdout
   --help                         Show this message and exit.
 ```
 
@@ -89,10 +107,17 @@ $040d   4c 00 04    JMP $0400
 ```
 Usage: symtool load [OPTIONS] ADDRESS [INPUT]
 
+  Load binary data from stdin or a file.
+
+  The load command will read bytes from stdin (or an input file, if
+  provided) and write them to the SYM-1 starting at <address>. If you
+  specify the --go option, symtool will ask the SYM-1 to jump to <address>
+  after loading the file.
+
 Options:
-  -s, --seek PREFIXED_INT
-  -c, --count PREFIXED_INT
-  -g, --go
+  -s, --seek PREFIXED_INT   seek this many bytes into input before reading
+  -c, --count PREFIXED_INT  number of bytes to read
+  -g, --go                  jump to address after loading
   --help                    Show this message and exit.
 ```
 
@@ -113,6 +138,11 @@ Specify `--go` to execute `g<address>` after loading the program.
 ```
 Usage: symtool fill [OPTIONS] ADDRESS FILLBYTE [COUNT]
 
+  Fill memory in the SYM-1 with the given byte value.
+
+  The value should be specified as an integer with an optional base prefix.
+  For example, '$FF' or '0xFF' to fill memory with the value 255.
+
 Options:
   --help  Show this message and exit.
 ```
@@ -129,6 +159,8 @@ $ symtool dump 0x200 16 -h
 
 ```
 Usage: symtool registers [OPTIONS]
+
+  Dump 6502 registers
 
 Options:
   --help  Show this message and exit.
@@ -151,6 +183,10 @@ p b0ac (1011000010101100)
 
 ```
 Usage: symtool go [OPTIONS] ADDRESS
+
+  Start executing at the given address.
+
+  This calls the monitor's "g" command.
 
 Options:
   --help  Show this message and exit.
