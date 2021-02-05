@@ -200,9 +200,32 @@ $ symtool go 0x200
 
 ## Compiling assembly programs
 
-The assembly programs in the `asm` directory are written to be
-compatible with the [ca65 assembler][]. The `Makefile` in that
+In order to build the assembler code in the `asm` directory you will
+need the [ca65][] assembler. The `Makefile` in that
 directory will compile the source to `.bin` files that can be loaded
 to your SYM-1 using the `symtool load` command.
 
 [ca65]: https://cc65.github.io/doc/ca65.html
+
+By default, the generated code expects to be loaded at address
+`0x200`, so you would load it like this:
+
+```
+symtool load 0x200 message.bin
+```
+
+If you want to load the code at a different address, you can set an
+explicit start address on the `make` command line:
+
+```
+make LD65FLAGS="--start-addr 0x200"
+```
+
+Or  you can edit `sym1.cfg` to change the default start address. For
+example:
+
+```
+FEATURES {
+    STARTADDRESS: default = $0400;
+}
+```
