@@ -45,7 +45,7 @@ def main(ctx, device, speed, verbose):
 
     logging.basicConfig(level=loglevel)
 
-    ctx.obj = symtool.symtool.SYM1(device, speed, timeout=1,
+    ctx.obj = symtool.symtool.SYM1(device, baudrate=speed, timeout=1,
                                    debug=(verbose > 2))
     ctx.obj.connect()
 
