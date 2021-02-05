@@ -47,6 +47,7 @@ def main(ctx, device, speed, verbose):
 
     ctx.obj = symtool.symtool.SYM1(device, speed, timeout=1,
                                    debug=(verbose > 2))
+    ctx.obj.connect()
 
 
 def prefixed_int(v):
@@ -72,9 +73,9 @@ def prefixed_int(v):
               help='output to file instead of stdout')
 @click.argument('address', type=prefixed_int)
 @click.argument('count', type=prefixed_int, default=1)
-@click.pass_context
+@click.pass_obj
 @handle_exceptions
-def dump(ctx, ascii_mode, output, address, count):
+def dump(sym, ascii_mode, output, address, count):
     '''Dump memory from the SYM-1 to stdout or a file.
 
     By default, the dump command will dump binary data to stdout. You can
@@ -87,8 +88,6 @@ def dump(ctx, ascii_mode, output, address, count):
     if count < 1:
         raise ValueError('count must be >= 1')
 
-    sym = ctx.obj
-    sym.connect()
     data = sym.dump(address, count)
 
     with output:
@@ -110,9 +109,9 @@ def dump(ctx, ascii_mode, output, address, count):
               help='jump to address after loading')
 @click.argument('address', type=prefixed_int)
 @click.argument('input', type=click.File(mode='rb'), default=sys.stdin.buffer)
-@click.pass_context
+@click.pass_obj
 @handle_exceptions
-def load(ctx, seek, address, count, go, input):
+def load(sym, seek, address, count, go, input):
     '''Load binary data from stdin or a file.
 
     The load command will read bytes from stdin (or an input file, if
@@ -120,9 +119,6 @@ def load(ctx, seek, address, count, go, input):
     specify the --go option, symtool will ask the SYM-1 to jump to <address>
     after loading the file.
     '''
-
-    sym = ctx.obj
-    sym.connect()
 
     with input:
         if seek:
@@ -138,9 +134,9 @@ def load(ctx, seek, address, count, go, input):
 @click.argument('address', type=prefixed_int)
 @click.argument('fillbyte', type=prefixed_int)
 @click.argument('count', type=prefixed_int, default=1)
-@click.pass_context
+@click.pass_obj
 @handle_exceptions
-def fill(ctx, address, fillbyte, count):
+def fill(sym, address, fillbyte, count):
     '''Fill memory in the SYM-1 with the given byte value.
 
     The value should be specified as an integer with an optional
@@ -148,15 +144,13 @@ def fill(ctx, address, fillbyte, count):
     the value 255.
     '''
 
-    sym = ctx.obj
-    sym.connect()
     sym.fill(address, fillbyte, count)
 
 
 @main.command()
-@click.pass_context
+@click.pass_obj
 @handle_exceptions
-def registers(ctx):
+def registers(sym):
     '''Dump 6502 registers'''
     flags = [
         'carry',
@@ -169,8 +163,6 @@ def registers(ctx):
         'neg',
     ]
 
-    sym = ctx.obj
-    sym.connect()
     data = sym.registers()
 
     for reg, val in data.items():
@@ -188,16 +180,14 @@ def registers(ctx):
 
 @main.command()
 @click.argument('address', type=prefixed_int)
-@click.pass_context
+@click.pass_obj
 @handle_exceptions
-def go(ctx, address):
+def go(sym, address):
     '''Start executing at the given address.
 
     This calls the monitor's "g" command.
     '''
 
-    sym = ctx.obj
-    sym.connect()
     sym.go(address)
 
 
