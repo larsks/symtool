@@ -8,13 +8,22 @@
 main:   ldx             #$ff
         ldy             #$ff
 
-loop:   dex                             ; for y in range(0xff):
-        bne             loop            ;    for x in range(0xff):
-        dey                             ;        pass
-        bne             loop
-
+loop:   jsr		delay
         jsr             BEEP
         clc
-        jsr             KYSTAT
-        bcc             main
+	jsr             KYSTAT		; check for key down
+	bcc             main		; continue if no key down
+
+	ldy		#$ff
+	jsr		delay
+	jsr		BEEP		; two short beeps to confirm
+	ldy		#$01		; exit
+	jsr		delay
+	jsr		BEEP
         rts
+
+delay:  dex                             ; for i in range(Y):
+	bne             delay           ;    for j in range(X):
+	dey                             ;        ...
+	bne             delay
+	rts
