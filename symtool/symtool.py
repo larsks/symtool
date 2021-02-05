@@ -39,16 +39,23 @@ def stripped(i):
     return (x.strip() for x in i)
 
 
-class SYM1 (serial.Serial):
-    character_interval = 0.05
 
-    def __init__(self, *args, debug=None, **kwargs):
-        super().__init__(*args, **kwargs)
-        LOG.info('using port %s', self.port)
+
+class DelayedSerial(serial.Serial):
+    def __init__(self, *args, debug=False, character_interval=None,
+                 baudrate=None, timeout=None, **kwargs):
+        baudrate = 4800 if baudrate is None else baudrate
+        timeout = 1 if timeout is None else timeout
+        character_interval = 0.05 if character_interval is None else character_interval
+
+        if baudrate > 4800:
+            LOG.warning('SYM-1 max baud rate is 4800bps')
 
         self._debug = debug
-        self._last_err = None
-        self._last_command = None
+        self._character_interval = character_interval
+
+        super().__init__(*args, baudrate=baudrate, timeout=timeout, **kwargs)
+        LOG.info('using port %s, speed %s', self.port, self.baudrate)
 
     def read(self, count):
         '''Read bytes from the SYM-1.'''
@@ -77,24 +84,33 @@ class SYM1 (serial.Serial):
         nbytes = 0
         for ch in data:
             nbytes += super().write(bytes([ch]))
-            time.sleep(self.character_interval)
+            time.sleep(self._character_interval)
 
         return nbytes
+
+
+class SYM1:
+    def __init__(self, port, *args, debug=None, **kwargs):
+        self._port = port
+        self._last_err = None
+        self._last_command = None
+        self._connected = False
+        self._dev = DelayedSerial(port, debug=debug, **kwargs)
 
     def send_command(self, cmd, *args):
         '''Send a command and parameters to the monitor.'''
 
         LOG.debug('send command: %s %s', cmd, args)
         self._last_command = (cmd, args)
-        self.write(cmd)
+        self._dev.write(cmd)
 
         for i, arg in enumerate(args):
             if i != 0:
-                self.write(',')
-            self.write(arg)
+                self._dev.write(',')
+            self._dev.write(arg)
 
-        self.write('\r')
-        self.read_until(b'\r\n')
+        self._dev.write('\r')
+        self._dev.read_until(b'\r\n')
 
     def return_to_prompt(self, send_cr=False):
         '''Cancel command and return to monitor prompt.
@@ -106,13 +122,13 @@ class SYM1 (serial.Serial):
         LOG.debug('waiting for prompt')
 
         if send_cr:
-            self.write('\r')
+            self._dev.write('\r')
 
         # XXX: single character markers make me nervous. Previously this
         # was read_until(b'\r\n.'), but changed because the 'f' (fill)
         # command returns directly to the prompt, and the '\r\n'
         # is consumed by send_command().
-        res = self.read_until(b'.')
+        res = self._dev.read_until(b'.')
         lines = [line for line in stripped(res.splitlines()) if line]
         for line in lines:
             if line.startswith(b'ER '):
@@ -134,19 +150,18 @@ class SYM1 (serial.Serial):
         LOG.info('connecting to sym1...')
 
         while True:
-            self.write('q')
-            ch = self.read(1)
+            self._dev.write('q')
+            ch = self._dev.read(1)
             if ch != b'':
                 break
 
-            LOG.warning('failed to connect on %s; retrying...',
-                        self.port)
+            LOG.warning('failed to connect on %s; retrying...', self._port)
             time.sleep(1)
 
         LOG.info('connected')
 
         if ch == b'q':
-            self.write('\r')
+            self._dev.write('\r')
 
         # We expect a CommandError here, since if the SYM-1 was
         # already connected we just send the invalid "q" command.
@@ -159,7 +174,7 @@ class SYM1 (serial.Serial):
         # Flush input buffer. This takes care of any extra output caused
         # by the monitor being in an unknown state when we started.
         try:
-            self.read_all()
+            self._dev.read_all()
         except TimeoutError:
             pass
 
@@ -167,13 +182,13 @@ class SYM1 (serial.Serial):
         '''Read register contents.'''
 
         self.send_command('r')
-        self.read_until(b',')
+        self._dev.read_until(b',')
 
         reg = {}
         for regname in ['s', 'f', 'a', 'x', 'y', 'p']:
-            self.write('>')
-            self.read_until(b'>')
-            res = self.read_until(b',')
+            self._dev.write('>')
+            self._dev.read_until(b'>')
+            res = self._dev.read_until(b',')
             data = res.strip().split(b',')[0]
             _regname, val = data.split()
             if _regname.decode().lower() != regname:
@@ -190,11 +205,11 @@ class SYM1 (serial.Serial):
         self.send_command('m', f'{addr:x}'.encode())
         data = []
         for i in range(count):
-            addr = self.read_until(b',')
-            val = self.read_until(b',')
+            addr = self._dev.read_until(b',')
+            val = self._dev.read_until(b',')
             data.append(int(val[:-1], 16))
-            self.write('>')
-            self.read_until(b'\r\n')
+            self._dev.write('>')
+            self._dev.read_until(b'\r\n')
 
         self.return_to_prompt(True)
         return bytes(data)
@@ -205,8 +220,8 @@ class SYM1 (serial.Serial):
         LOG.info('loading %d bytes of data at $%X', len(data), addr)
         self.send_command('d', f'{addr:x}'.encode())
         for val in data:
-            self.write(f'{val:02x}'.encode())
-            self.read_until(b' ')
+            self._dev.write(f'{val:02x}'.encode())
+            self._dev.read_until(b' ')
 
         self.return_to_prompt(True)
 
