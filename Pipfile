@@ -11,6 +11,7 @@ hexdump = "*"
 
 [dev-packages]
 pytest = "*"
+pytest-coverage = "*"
 
 [requires]
 python_version = "3.9"
