@@ -31,8 +31,8 @@ GENERATED = \
 %.x: %.s genexports.awk
 	$(AWK) -f genexports.awk $< > $@ || { rm -f $@; false; }
 
-%.d: %.s gendeps.awk
-	$(AWK) -f gendeps.awk $< > $@ || { rm -f $@; false; }
+%.d: %.s
+	$(CA65) --create-dep $@ $<
 
 %.r: %.lbl genflags.awk
 	$(AWK) -f genflags.awk $< > $@ || { rm -f $@; false; }
@@ -53,6 +53,6 @@ clean:
 
 .PRECIOUS: libsym.o
 
-libsym.o: monitor.s monitor.x
+libsym.d: monitor.x
 
 include $(DEPS)
