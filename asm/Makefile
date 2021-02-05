@@ -25,23 +25,38 @@ DEPS = $(SOURCES:.s=.d)
 GENERATED = \
 	$(PRGS)
 
+# make with V=1 to enable verbose output
+ifeq ($(V),1)
+	Q=
+	ECHO=@:
+else
+	Q=@
+	ECHO=@echo
+endif
+
 %.o %.lst: %.s
-	$(CA65) $(CA65FLAGS) -g -t none -o $@ -l $(@:.o=.lst) $<
+	$(ECHO) "ASSEMBLE $^ -> $@"
+	$(@)$(CA65) $(CA65FLAGS) -g -t none -o $@ -l $(@:.o=.lst) $<
 
 %.x: %.s genexports.awk
-	$(AWK) -f genexports.awk $< > $@ || { rm -f $@; false; }
+	$(ECHO) "EXPORTS $^ -> $@"
+	$(Q)$(AWK) -f genexports.awk $< > $@ || { rm -f $@; false; }
 
 %.d: %.s
-	$(CA65) --create-dep $@ $<
+	$(ECHO) "DEPS $^ -> $@"
+	$(Q)$(CA65) --create-dep $@ $<
 
 %.r: %.lbl genflags.awk
-	$(AWK) -f genflags.awk $< > $@ || { rm -f $@; false; }
+	$(ECHO) "FLAGS $^ -> $@"
+	$(Q)$(AWK) -f genflags.awk $< > $@ || { rm -f $@; false; }
 
 %.ps: %.lst
-	$(ENSCRIPT) -o $@ -r $<
+	$(ECHO) "PS $^ -> $@"
+	$(Q)$(ENSCRIPT) -o $@ -r $<
 
 %.bin: %.o libsym.o
-	$(LD65)  $(LD65FLAGS) \
+	$(ECHO) "LINK $^ -> $@"
+	$(Q)$(LD65)  $(LD65FLAGS) \
 		-C sym1.cfg \
 		-Ln $(<:.o=.lbl) \
 		-o $@ $^
