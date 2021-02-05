@@ -1,7 +1,7 @@
 ; countdown.s
 ;
 ; This is "Program #3 - Count and Beep" from page 14 of the SYM-1 "Technical
-; Notes" document (with a modified message).
+; Notes" document
 ; (http://www.6502.org/trainers/synertek/manuals/technotes.pdf)
 ;
 ; part of symtool (https://github.com/larsks/symtool)
