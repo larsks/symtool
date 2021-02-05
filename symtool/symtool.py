@@ -102,6 +102,12 @@ class DelayedSerial(serial.Serial):
 
         return nbytes
 
+    def read_until(self, data):
+        if isinstance(data, str):
+            data = data.encode()
+
+        return super().read_until(data)
+
 
 class SYM1:
     def __init__(self, port, *args, debug=None, **kwargs):
