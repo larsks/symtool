@@ -13,7 +13,7 @@ import symtool.symtool
 @click.option('--speed', '-s', default=4800, type=int,
               help='set port speed (default 4800)')
 @click.option('--verbose', '-v', count=True,
-              help='enable additional logging (-vv for debug)')
+              help='enable additional logging')
 @click.pass_context
 def main(ctx, device, speed, verbose):
     '''Symtool is a tool for interacting with a SYM-1 computer.
@@ -26,8 +26,6 @@ def main(ctx, device, speed, verbose):
     The SYM-1 supports  baud rates from 110bps to 4800bps.
     '''
 
-    debug = verbose > 1
-
     try:
         loglevel = ['WARNING', 'INFO', 'DEBUG'][verbose]
     except IndexError:
@@ -35,7 +33,8 @@ def main(ctx, device, speed, verbose):
 
     logging.basicConfig(level=loglevel)
 
-    ctx.obj = symtool.symtool.SYM1(device, speed, timeout=1, debug=debug)
+    ctx.obj = symtool.symtool.SYM1(device, speed, timeout=1,
+                                   debug=(verbose > 2))
 
 
 def prefixed_int(v):
