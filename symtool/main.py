@@ -1,3 +1,8 @@
+'''symtool, a cli for your Synertek SYM-1
+
+(c) 2021 Lars Kellogg-Stedman <lars@oddbit.com>
+'''
+
 import click
 import functools
 import hexdump
