@@ -19,6 +19,22 @@ def handle_exceptions(func):
     return wrapper
 
 
+def prefixed_int(v):
+    '''Transform a string argument with a numeric prefix into an integer.
+
+    Accepts both standard Python prefixes (0x, 0o, 0b) as well as
+    conventional 6502 prefixes ($ for hex, % for binary).
+    '''
+    if isinstance(v, int):
+        return v
+    elif v.startswith('$'):
+        return int(v[1:], 16)
+    elif v.startswith('%'):
+        return int(v[1:], 2)
+    else:
+        return int(v, 0)
+
+
 @click.group(context_settings=dict(auto_envvar_prefix='SYMTOOL'))
 @click.option('--device', '-d', default='/dev/ttyS0',
               help='set serial port (default=/dev/ttyS0)')
@@ -26,8 +42,11 @@ def handle_exceptions(func):
               help='set port speed (default 4800)')
 @click.option('--verbose', '-v', count=True,
               help='enable additional logging')
+@click.option('--retries', '-r', type=int,
+              help='number of times to retry connection before failing')
 @click.pass_context
-def main(ctx, device, speed, verbose):
+@handle_exceptions
+def main(ctx, device, speed, retries, verbose):
     '''Symtool is a tool for interacting with a SYM-1 computer.
 
     The SYM-1 is a 6502 based single board computer produced by
@@ -47,23 +66,7 @@ def main(ctx, device, speed, verbose):
 
     ctx.obj = symtool.symtool.SYM1(device, baudrate=speed, timeout=1,
                                    debug=(verbose > 2))
-    ctx.obj.connect()
-
-
-def prefixed_int(v):
-    '''Transform a string argument with a numeric prefix into an integer.
-
-    Accepts both standard Python prefixes (0x, 0o, 0b) as well as
-    conventional 6502 prefixes ($ for hex, % for binary).
-    '''
-    if isinstance(v, int):
-        return v
-    elif v.startswith('$'):
-        return int(v[1:], 16)
-    elif v.startswith('%'):
-        return int(v[1:], 2)
-    else:
-        return int(v, 0)
+    ctx.obj.connect(retries=retries)
 
 
 @main.command()
