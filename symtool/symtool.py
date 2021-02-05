@@ -159,7 +159,7 @@ class SYM1:
         # return everything but the prompt
         return lines[:-1]
 
-    def connect(self):
+    def connect(self, retries=None):
         '''Intiailize connection to the SYM-1.
 
         Send a 'q' character out the serial port to trigger the SYM-1
@@ -171,17 +171,21 @@ class SYM1:
 
         while True:
             self._dev.write('q')
-            ch = self._dev.read(1)
-            if ch != b'':
+            try:
+                self._dev.read(1)
                 break
+            except TimeoutError:
+                if retries is not None:
+                    if retries == 0:
+                        raise
+                    retries -= 1
 
             LOG.warning('failed to connect on %s; retrying...', self._port)
             time.sleep(1)
 
         LOG.info('connected')
 
-        if ch == b'q':
-            self._dev.write('\r')
+        self._dev.write('\r')
 
         # We expect a CommandError here, since if the SYM-1 was
         # already connected we just send the invalid "q" command.
