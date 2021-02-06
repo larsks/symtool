@@ -1,3 +1,53 @@
+from dataclasses import dataclass, field
+from functools import reduce
+
+
+@dataclass
+class MODE:
+    size: int = 0
+    fmt: str = '{mnemonic:7}'
+
+
+@dataclass
+class INSTRUCTION:
+    addr: int = 0
+    src: list[int] = field(default_factory=list)
+    mode: MODE = field(default_factory=MODE)
+    mnemonic: str = '???'
+    operand: int = 0
+
+    @property
+    def asm(self):
+        return self.mode.fmt.format(**vars(self))
+
+    @property
+    def hex(self):
+        return ' '.join(f'{x:02x}' for x in self.src)
+
+    def __str__(self):
+        return f'${self.addr:04x}   {self.hex:12}{self.asm}'
+
+
+address_modes = {
+    'imp': MODE(0, '{mnemonic:7}'),
+    'acc': MODE(0, '{mnemonic:7}'),
+
+    'zpy': MODE(1, '{mnemonic:7} ${operand:02X},Y'),
+    'zpx': MODE(1, '{mnemonic:7} ${operand:02X},X'),
+    'rel': MODE(1, '{mnemonic:7} ${operand:02X}'),
+    'zpg': MODE(1, '{mnemonic:7} ${operand:02X}'),
+    'imm': MODE(1, '{mnemonic:7} #${operand:02X}'),
+    'inx': MODE(1, '{mnemonic:7} (${operand:02X},X)'),
+    'iny': MODE(1, '{mnemonic:7} (${operand:02X}),Y'),
+
+    'ind': MODE(2, '{mnemonic:7} (${operand:04X})'),
+    'aby': MODE(2, '{mnemonic:7} ${operand:04X},Y'),
+    'abx': MODE(2, '{mnemonic:7} ${operand:04X},X'),
+    'abs': MODE(2, '{mnemonic:7} ${operand:04X}'),
+
+    'byte': MODE(0, '{mnemonic:7} ${operand:02X}'),
+}
+
 mnemonics = [
   'BRK', 'ORA', '???', '???', '???', 'ORA', 'ASL', '???', 'PHP', 'ORA', 'ASL', '???', '???', 'ORA', 'ASL', '???',
   'BPL', 'ORA', '???', '???', '???', 'ORA', 'ASL', '???', 'CLC', 'ORA', '???', '???', '???', 'ORA', 'ASL', '???',
@@ -12,9 +62,10 @@ mnemonics = [
   'LDY', 'LDA', 'LDX', '???', 'LDY', 'LDA', 'LDX', '???', 'TAY', 'LDA', 'TAX', '???', 'LDY', 'LDA', 'LDX', '???',
   'BCS', 'LDA', '???', '???', 'LDY', 'LDA', 'LDX', '???', 'CLV', 'LDA', 'TSX', '???', 'LDY', 'LDA', 'LDX', '???',
   'CPY', 'CMP', '???', '???', 'CPY', 'CMP', 'DEC', '???', 'INY', 'CMP', 'DEX', '???', 'CPY', 'CMP', 'DEC', '???',
-  'BNE', 'CMP', '???', '???', '???', 'CMP', 'DEC', '???', 'CLD', 'CMP', '???', '???', '???', 'CMP', 'DEC', '???',
+  'bNE', 'CMP', '???', '???', '???', 'CMP', 'DEC', '???', 'CLD', 'CMP', '???', '???', '???', 'CMP', 'DEC', '???',
   'CPX', 'SBC', '???', '???', 'CPX', 'SBC', 'INC', '???', 'INX', 'SBC', 'NOP', '???', 'CPX', 'SBC', 'INC', '???',
-  'BEQ', 'SBC', '???', '???', '???', 'SBC', 'INC', '???', 'SED', 'SBC', '???', '???', '???', 'SBC', 'INC', '???']
+  'BEQ', 'SBC', '???', '???', '???', 'SBC', 'INC', '???', 'SED', 'SBC', '???', '???', '???', 'SBC', 'INC', '???'
+]
 
 addressing = [
   'imp', 'inx', 'imp', 'imp', 'imp', 'zpg', 'zpg', 'imp', 'imp', 'imm', 'acc', 'imp', 'imp', 'abs', 'abs', 'imp',
@@ -32,84 +83,54 @@ addressing = [
   'imm', 'inx', 'imp', 'imp', 'zpg', 'zpg', 'zpg', 'imp', 'imp', 'imm', 'imp', 'imp', 'abs', 'abs', 'abs', 'imp',
   'rel', 'iny', 'imp', 'imp', 'imp', 'zpx', 'zpx', 'imp', 'imp', 'aby', 'imp', 'imp', 'imp', 'abx', 'abx', 'imp',
   'imm', 'inx', 'imp', 'imp', 'zpg', 'zpg', 'zpg', 'imp', 'imp', 'imm', 'imp', 'imp', 'abs', 'abs', 'abs', 'imp',
-  'rel', 'iny', 'imp', 'imp', 'imp', 'zpx', 'zpx', 'imp', 'imp', 'aby', 'imp', 'imp', 'imp', 'abx', 'abx', 'imp']
+  'rel', 'iny', 'imp', 'imp', 'imp', 'zpx', 'zpx', 'imp', 'imp', 'aby', 'imp', 'imp', 'imp', 'abx', 'abx', 'imp'
+]
 
 
 def disasm(data, base=0):
-    def _disasm_one_line(data):
-        addr, opcode = next(data)
+    instructions = []
+    addr = base
 
-        line = {
-            'addr': addr,
-            'hex': [],
-            'asm': None,
-        }
+    while data:
+        opcode = data[0]
+        src = [data[0]]
+        operand = None
 
         mnemonic = mnemonics[opcode]
-        addrmode = addressing[opcode]
-        line['hex'].append(opcode)
+        mode = address_modes[addressing[opcode]]
 
-        if addrmode in ['imp', 'acc']:
-            line['asm'] = mnemonic
-            return line
+        if mode.size:
+            # XXX: note to self, slicing can extend beyond the end of
+            # a sequence without an error.
+            operands = data[1:mode.size + 1]
+            if len(operands) < mode.size:
+                break
+            src.extend(operands)
+            operand = reduce(lambda x, y: x + (y << 8), operands)
 
-        operand = next(data)[1]
-        line['hex'].append(operand)
+        inst = INSTRUCTION(
+            addr=addr,
+            src=src,
+            mode=mode,
+            mnemonic=mnemonic,
+            operand=operand,
+        )
+        addr += mode.size + 1
+        data = data[mode.size + 1:]
+        instructions.append(inst)
 
-        if addrmode == 'imm':
-            line['asm'] = f'{mnemonic} #${operand:02X}'
-            return line
-        elif addrmode in ['rel', 'zpg']:
-            line['asm'] = f'{mnemonic} ${operand:02X}'
-            return line
-        elif addrmode == 'zpx':
-            line['asm'] = f'{mnemonic} ${operand:02X},X'
-            return line
-        elif addrmode == 'zpy':
-            line['asm'] = f'{mnemonic} ${operand:02X},Y'
-            return line
-        elif addrmode == 'inx':
-            line['asm'] = f'{mnemonic} (${operand:02X},X)'
-            return line
-        elif addrmode == 'zpy':
-            line['asm'] = f'{mnemonic} (${operand:02X}),Y'
-            return line
+    if data:
+        for i, val in enumerate(data):
+            instructions.append(INSTRUCTION(
+                addr=addr + i,
+                src=[val],
+                mode=address_modes['byte'],
+                mnemonic='.byte',
+                operand=val,
+            ))
 
-        op2 = next(data)[1]
-
-        line['hex'].append(op2)
-        operand = (op2 << 8) + operand
-
-        if addrmode == 'ind':
-            line['asm'] = f'{mnemonic} (${operand:04X})'
-            return line
-        elif addrmode == 'abs':
-            line['asm'] = f'{mnemonic} ${operand:04X}'
-            return line
-        elif addrmode == 'abx':
-            line['asm'] = f'{mnemonic} ${operand:04X},X'
-            return line
-        elif addrmode == 'aby':
-            line['asm'] = f'{mnemonic} ${operand:04X},Y'
-            return line
-
-    data = enumerate(data, base)
-    lines = []
-
-    while True:
-        try:
-            lines.append(_disasm_one_line(data))
-        except StopIteration:
-            break
-
-    return lines
+    return instructions
 
 
-def format(lines):
-    buf = []
-
-    for line in lines:
-        hex = ' '.join(f'{x:02x}' for x in line['hex'])
-        buf.append(f'${line["addr"]:04x}   {hex:12}{line["asm"]}\n')
-
-    return ''.join(buf)
+def format(instructions):
+    return '\n'.join(str(inst) for inst in instructions) + '\n'
