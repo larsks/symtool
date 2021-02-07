@@ -1,0 +1,29 @@
+name: run unit tests and publish on pypi
+on:
+  push:
+    tags:
+      - 'v_*'
+
+jobs:
+  run-unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+
+      - run: pip install poetry tox tox-poetry
+      - run: tox -e pep8
+      - run: tox -e unit
+
+  publish:
+    needs: run-unit-tests
+    runs-on: ubuntu-latest
+    env:
+      POETRY_PYPI_TOKEN_PYPI: "${{ secrets.PYPI_API_TOKEN }}"
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+
+      - run: pip install poetry
+      - run: poetry build
+      - run: poetry publish
