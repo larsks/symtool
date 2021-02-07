@@ -1,3 +1,0 @@
-click
-hexdump
-pyserial

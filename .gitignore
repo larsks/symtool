@@ -18,3 +18,7 @@ Pipfile.lock
 
 # radare scripts
 *.r
+.tox/
+.coverage
+dist/
+poetry.lock

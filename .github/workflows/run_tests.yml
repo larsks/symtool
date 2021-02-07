@@ -9,7 +9,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
 
-      - run: pip install tox
+      - run: pip install poetry tox tox-poetry
       - run: tox -e pep8
       - run: tox -e unit -- --cov-report=xml:cov_unit_xml.xml
 
