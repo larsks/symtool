@@ -43,6 +43,14 @@ using Python's numeric prefixes:
 And in order to meet common 6502 conventions, you can also use `$` as
 a prefix on hexadecimal numbers (`$2000`).
 
+## Installation
+
+Symtool is published on PyPi, so you can run:
+
+```
+pip install symtool
+```
+
 ## Configuration
 
 You can set the device and speed on the command line using the
