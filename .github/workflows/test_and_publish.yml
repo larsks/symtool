@@ -19,6 +19,22 @@ jobs:
           files: cov_unit_xml.xml
           flags: unittests
 
+  # always publish to test pypi
+  publish-test:
+    needs: run-unit-tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+
+      - run: pip install poetry tox tox-poetry
+      - run: poetry build
+      - run: |
+          poetry config repositories.testpypi https://test.pypi.org/legacy/
+          POETRY_PYPI_TOKEN_TESTPYPI="${{ secrets.TEST_PYPI_API_TOKEN }}" \
+            poetry publish -r testpypi
+
+  # only publish tagged releases to real pypi
   publish:
     if: >-
       startsWith(github.ref, 'refs/tags/v_')
@@ -30,8 +46,6 @@ jobs:
 
       - run: pip install poetry tox tox-poetry
       - run: poetry build
-
-      - name: Publish distribution 📦 to PyPI
-        uses: pypa/gh-action-pypi-publish@master
-        with:
-          password: ${{ secrets.PYPI_API_TOKEN }}
+      - run: |
+          POETRY_PYPI_TOKEN_PYPI="${{ secrets.PYPI_API_TOKEN }}" \
+            poetry publish -r pypi
