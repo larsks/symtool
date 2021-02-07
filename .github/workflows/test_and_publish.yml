@@ -1,0 +1,37 @@
+name: publish package on pypi
+on:
+  push:
+
+jobs:
+  run-unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+
+      - run: pip install poetry tox tox-poetry
+      - run: tox -e pep8
+      - run: tox -e unit -- --cov-report=xml:cov_unit_xml.xml
+
+      - uses: codecov/codecov-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: cov_unit_xml.xml
+          flags: unittests
+
+  publish:
+    if: >-
+      startsWith(github.ref, 'refs/tags/v_')
+    needs: run-unit-tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+
+      - run: pip install poetry tox tox-poetry
+      - run: poetry build
+
+      - name: Publish distribution 📦 to PyPI
+        uses: pypa/gh-action-pypi-publish@master
+        with:
+          password: ${{ secrets.PYPI_API_TOKEN }}
