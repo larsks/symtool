@@ -1,4 +1,4 @@
-name: publish package on pypi
+name: run unit tests and publish on pypi
 on:
   push:
 
