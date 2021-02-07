@@ -9,8 +9,22 @@ import hexdump
 import logging
 import sys
 
+from dataclasses import dataclass, field
+
+import symtool
 import symtool.disasm
 import symtool.symtool
+
+
+@dataclass
+class Config:
+    retries: int = 0
+
+
+@dataclass
+class Context:
+    sym: symtool.symtool.SYM1 = None
+    config: Config = field(default_factory=Config)
 
 
 def handle_exceptions(func):
@@ -20,6 +34,15 @@ def handle_exceptions(func):
             return func(*args, **kwargs)
         except symtool.symtool.SYMError as err:
             raise click.ClickException(str(err))
+
+    return wrapper
+
+
+def needs_connect(func):
+    @functools.wraps(func)
+    def wrapper(ctx, *args, **kwargs):
+        ctx.sym.connect(retries=ctx.config.retries)
+        return func(ctx.sym, *args, **kwargs)
 
     return wrapper
 
@@ -69,9 +92,18 @@ def main(ctx, device, speed, retries, verbose):
 
     logging.basicConfig(level=loglevel)
 
-    ctx.obj = symtool.symtool.SYM1(device, baudrate=speed, timeout=1,
-                                   debug=(verbose > 2))
-    ctx.obj.connect(retries=retries)
+    config = Config(retries=retries)
+    sym = symtool.symtool.SYM1(device, baudrate=speed, timeout=1, debug=(verbose > 2))
+    ctx.obj = Context(
+        sym=sym,
+        config=config,
+    )
+
+
+@main.command()
+def version():
+    '''Show symtool version'''
+    print(f'symtool {symtool.__version__}')
 
 
 @main.command()
@@ -83,6 +115,7 @@ def main(ctx, device, speed, retries, verbose):
 @click.argument('count', type=prefixed_int, default=1)
 @click.pass_obj
 @handle_exceptions
+@needs_connect
 def dump(sym, ascii_mode, output, address, count):
     '''Dump memory from the SYM-1 to stdout or a file.
 
@@ -119,6 +152,7 @@ def dump(sym, ascii_mode, output, address, count):
 @click.argument('input', type=click.File(mode='rb'), default=sys.stdin.buffer)
 @click.pass_obj
 @handle_exceptions
+@needs_connect
 def load(sym, seek, address, count, go, input):
     '''Load binary data from stdin or a file.
 
@@ -144,6 +178,7 @@ def load(sym, seek, address, count, go, input):
 @click.argument('count', type=prefixed_int, default=1)
 @click.pass_obj
 @handle_exceptions
+@needs_connect
 def fill(sym, address, fillbyte, count):
     '''Fill memory in the SYM-1 with the given byte value.
 
@@ -158,6 +193,7 @@ def fill(sym, address, fillbyte, count):
 @main.command()
 @click.pass_obj
 @handle_exceptions
+@needs_connect
 def registers(sym):
     '''Dump 6502 registers'''
     flags = [
@@ -190,6 +226,7 @@ def registers(sym):
 @click.argument('address', type=prefixed_int)
 @click.pass_obj
 @handle_exceptions
+@needs_connect
 def go(sym, address):
     '''Start executing at the given address.
 
@@ -197,7 +234,3 @@ def go(sym, address):
     '''
 
     sym.go(address)
-
-
-if __name__ == '__main__':
-    main()

@@ -56,7 +56,7 @@ def connected(func):
 
 
 class DelayedSerial(serial.Serial):
-    def __init__(self, *args, debug=False, character_interval=None,
+    def __init__(self, port, debug=False, character_interval=None,
                  baudrate=None, timeout=None, **kwargs):
         baudrate = 4800 if baudrate is None else baudrate
         timeout = 1 if timeout is None else timeout
@@ -68,8 +68,13 @@ class DelayedSerial(serial.Serial):
         self._debug = debug
         self._character_interval = character_interval
 
-        super().__init__(*args, baudrate=baudrate, timeout=timeout, **kwargs)
-        LOG.info('using port %s, speed %s', self.port, self.baudrate)
+        super().__init__(baudrate=baudrate, timeout=timeout, **kwargs)
+        self.port = port
+        LOG.info('using port %s @ %sbps', self.port, self.baudrate)
+
+    def open(self):
+        LOG.info('connecting to port %s @ %sbps', self.port, self.baudrate)
+        super().open()
 
     def read(self, count):
         '''Read bytes from the SYM-1.'''
@@ -110,12 +115,11 @@ class DelayedSerial(serial.Serial):
 
 
 class SYM1:
-    def __init__(self, port, *args, debug=None, **kwargs):
-        self._port = port
+    def __init__(self, port, *args, **kwargs):
         self._last_err = None
         self._last_command = None
         self._connected = False
-        self._dev = DelayedSerial(port, debug=debug, **kwargs)
+        self._dev = DelayedSerial(port, **kwargs)
 
     def send_command(self, cmd, *args):
         '''Send a command and parameters to the monitor.'''
@@ -167,7 +171,7 @@ class SYM1:
         serial prompt was already active.
         '''
 
-        LOG.info('connecting to sym1...')
+        self._dev.open()
 
         while True:
             self._dev.write('q')
@@ -180,7 +184,7 @@ class SYM1:
                         raise
                     retries -= 1
 
-            LOG.warning('failed to connect on %s; retrying...', self._port)
+            LOG.warning('failed to connect on %s; retrying...', self._dev.port)
             time.sleep(1)
 
         LOG.info('connected')
