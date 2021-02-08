@@ -4,7 +4,7 @@ build-backend = 'poetry.core.masonry.api'
 
 [tool.poetry]
 name = 'symtool'
-version = '0.0.4'
+version = '0.0.5'
 description = 'A tool for interacting with your SYM-1 microcomputer'
 authors = ['Lars Kellogg-Stedman <lars@oddbit.com>']
 license = 'GPLv3'
