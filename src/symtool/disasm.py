@@ -11,7 +11,7 @@ class MODE:
 @dataclass
 class INSTRUCTION:
     addr: int = 0
-    src: list[int] = field(default_factory=list)
+    src: list = field(default_factory=list)
     mode: MODE = field(default_factory=MODE)
     mnemonic: str = '???'
     operand: int = 0
